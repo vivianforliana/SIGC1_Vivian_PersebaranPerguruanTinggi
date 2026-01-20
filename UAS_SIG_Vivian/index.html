@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGIS Kampus - Vivian Forliana</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- CSS SETUP MODERN --- */
+        :root {
+            --primary: #0f172a; /* Biru Gelap Akademis (Oxford Blue) */
+            --accent: #3b82f6;  /* Biru Terang Modern */
+            --gold: #f59e0b;    /* Emas untuk kesan prestasi */
+            --text: #334155;
+            --bg: #f1f5f9;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* --- 1. HERO SECTION (NUANSA KAMPUS) --- */
+        .hero-section {
+            min-height: 85vh; /* Lebih tinggi agar gambar kampus terlihat */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            
+            /* Ganti 'bg_kampus.jpg' dengan nama file gambarmu */
+            /* Jika tidak ada gambar, ini akan jadi warna biru elegan */
+            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.7)), 
+                        url('bg_kampus.png') center/cover no-repeat;
+            
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* Hiasan Peta Abstrak di background (Opsional, murni CSS) */
+        .hero-section::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(var(--accent) 1px, transparent 1px);
+            background-size: 30px 30px; opacity: 0.1; pointer-events: none;
+        }
+
+        .hero-container {
+            max-width: 900px;
+            z-index: 2;
+            animation: fadeIn Up 1s ease;
+        }
+
+        .badge-campus {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #60a5fa;
+            padding: 8px 25px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        h1 { 
+            font-size: 3.5rem; /* Lebih besar */
+            line-height: 1.2; 
+            margin-bottom: 1.5rem; 
+            font-weight: 700;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        h1 span { color: var(--accent); } /* Highlight kata penting */
+
+        .abstract-text {
+            font-size: 1.15rem;
+            color: #cbd5e1;
+            line-height: 1.8;
+            margin-bottom: 0;
+            font-weight: 300;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* --- 2. STATS SECTION (AKADEMIS) --- */
+        .stats-section {
+            max-width: 1100px;
+            margin: -60px auto 4rem auto; /* Overlap ke atas */
+            padding: 0 1rem;
+            position: relative; z-index: 10;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+            transition: transform 0.3s;
+            border-bottom: 4px solid transparent;
+        }
+
+        .stat-box:hover { 
+            transform: translateY(-10px); 
+            border-bottom-color: var(--accent);
+        }
+
+        .stat-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+        
+        .stat-number { 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            color: var(--primary); 
+            line-height: 1;
+        }
+        
+        .stat-label { 
+            font-size: 0.9rem; 
+            color: #64748b; 
+            font-weight: 500; 
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* --- 3. PETA INTERAKTIF (CLEAN FRAME) --- */
+        .interactive-map-section {
+            padding: 2rem 2rem 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header { text-align: center; margin-bottom: 3rem; }
+        .section-title { font-size: 2.2rem; color: var(--primary); font-weight: 700; margin-bottom: 0.5rem; }
+        .section-desc { color: #64748b; max-width: 600px; margin: 0 auto; }
+
+        .map-window {
+            width: 100%;
+            height: 650px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border: 8px solid white; /* Frame putih tebal */
+            position: relative;
+        }
+        .map-window iframe { width: 100%; height: 100%; border: none; }
+
+        .btn-fullscreen {
+            display: table; margin: 2rem auto 0 auto;
+            padding: 12px 30px;
+            background: white; border: 2px solid var(--primary);
+            color: var(--primary); border-radius: 50px;
+            text-decoration: none; font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-fullscreen:hover { background: var(--primary); color: white; }
+
+        /* --- 4. BOTTOM SPLIT (LAYOUT & PROFILE) --- */
+        .bottom-container {
+            max-width: 1200px;
+            margin: 0 auto 5rem auto;
+            padding: 0 2rem;
+            display: flex; gap: 3rem;
+            align-items: stretch;
+        }
+
+        /* Layout Peta (Kiri) */
+        .layout-card {
+            flex: 1.6;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            text-align: center;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        
+        .layout-title { font-size: 1.2rem; font-weight: 600; color: var(--primary); margin-bottom: 5px; }
+        .layout-subtitle { font-size: 0.9rem; color: #94a3b8; margin-bottom: 1.5rem; }
+        
+        .map-thumbnail {
+            width: 100%; border-radius: 10px; cursor: zoom-in;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .map-thumbnail:hover { transform: scale(1.02); }
+
+        /* Profil (Kanan) */
+        .profile-card {
+            flex: 1;
+            background: white;
+            padding: 3rem 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            position: relative; overflow: hidden;
+        }
+        
+        /* Hiasan sudut profil */
+        .profile-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+        }
+
+        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 2rem; }
+        .profile-icon { font-size: 2.5rem; } /* Emoji orang/mahasiswa */
+        
+        .info-group { margin-bottom: 1.5rem; }
+        .info-label { font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: block; }
+        .info-value { font-size: 1.1rem; color: var(--text); font-weight: 600; }
+        .info-value a { color: var(--accent); text-decoration: none; }
+
+        /* Footer */
+        footer { background: white; padding: 2rem; text-align: center; color: #94a3b8; font-size: 0.9rem; border-top: 1px solid #e2e8f0; }
+
+        /* Modal & Responsive */
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.95); align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { max-width: 90%; max-height: 90vh; border-radius: 5px; animation: zoom 0.3s; }
+        .close { position: absolute; top: 30px; right: 50px; color: white; font-size: 40px; cursor: pointer; }
+        @keyframes zoom { from {transform:scale(0.8); opacity: 0;} to {transform:scale(1); opacity: 1;} }
+
+        @media (max-width: 900px) {
+            h1 { font-size: 2.5rem; }
+            .bottom-container { flex-direction: column; }
+            .hero-section { min-height: auto; padding: 6rem 1.5rem; }
+            .stats-section { margin-top: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="badge-campus">📍 WebGIS Akademik 2026</div>
+            
+            <h1>Peta Tematik Persebaran<br><span>Perguruan Tinggi di Kecamatan Lowokwaru</span></h1>
+            
+            <div class="abstract-text">
+                <p>
+                    Analisis spasial distribusi fasilitas pendidikan tinggi di Kecamatan Lowokwaru, Malang.
+                    Visualisasi data geografis untuk mendukung perencanaan wilayah dan aksesibilitas pendidikan.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-icon">🎓</span> <div class="stat-number" data-target="20">0</div>
+                <div class="stat-label">Kampus Terdata</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-icon">🗺️</span> <div class="stat-number" data-target="8">0</div>
+                <div class="stat-label">Layer Tematik</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-icon">🛣️</span> <div class="stat-number" data-target="12">0</div>
+                <div class="stat-label">Kelurahan</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-icon">📍</span> <div class="stat-number" data-target="1">0</div>
+                <div class="stat-label">Kecamatan Lowokwaru</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="interactive-map-section">
+        <div class="section-header">
+            <h2 class="section-title">Eksplorasi Peta Digital</h2>
+            <p class="section-desc">Gunakan fitur zoom dan klik pada marker kampus untuk melihat detail informasi atribut.</p>
+        </div>
+
+        <div class="map-window">
+            <iframe src="peta/index.html" title="Peta WebGIS"></iframe>
+        </div>
+
+        <a href="peta/index.html" target="_blank" class="btn-fullscreen">
+            ⛶ Buka Mode Layar Penuh
+        </a>
+    </section>
+
+    <div class="bottom-container">
+        
+        <div class="layout-card">
+            <div class="layout-title">Layout Peta Cetak</div>
+            <div class="layout-subtitle">Format kartografi standar dengan legenda & skala</div>
+            <img id="myImg" class="map-thumbnail" src="peta/images/layout_peta.png" alt="Layout Peta Cetak" onclick="openModal()">
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;">(Klik gambar untuk memperbesar)</div>
+        </div>
+
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-icon">👨‍💻</div>
+                <div>
+                    <h3 style="margin:0; color:var(--primary)">Pengembang</h3>
+                    <span style="font-size:0.85rem; color:#64748b">Mahasiswa Teknik Informatika</span>
+                </div>
+            </div>
+            
+            <div class="info-group">
+                <span class="info-label">Nama Lengkap</span>
+                <div class="info-value">
+                    <a href="https://vivianforliana.netlify.app/" target="_blank">Vivian Forliana ↗</a>
+                </div>
+            </div>
+
+            <div class="info-group">
+                <span class="info-label">NIM</span>
+                <div class="info-value">23201243</div>
+            </div>
+
+            <div class="info-group">
+                <span class="info-label">Institusi</span>
+                <div class="info-value">Institut Teknologi dan Bisnis Asia Malang</div>
+            </div>
+            
+            <div class="info-group">
+                <span class="info-label">Mata Kuliah</span>
+                <div class="info-value">Sistem Informasi Geografis</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Vivian Forliana. Disusun untuk memenuhi Ujian Akhir Semester.</p>
+    </footer>
+
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="img01">
+    </div>
+
+    <script>
+        // Animasi Angka
+        const counters = document.querySelectorAll('.stat-number');
+        const speed = 200;
+        const animateCounters = () => {
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText;
+                    const inc = target / speed;
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc);
+                        setTimeout(updateCount, 20);
+                    } else { counter.innerText = target + (target===10 ? "+" : ""); } // Tambah '+' jika target 10
+                };
+                updateCount();
+            });
+        };
+        const sectionStats = document.querySelector('.stats-section');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) { animateCounters(); observer.unobserve(sectionStats); }
+            });
+        }, { threshold: 0.5 });
+        observer.observe(sectionStats);
+
+        // Modal Gambar
+        var modal = document.getElementById("imageModal");
+        var img = document.getElementById("myImg");
+        var modalImg = document.getElementById("img01");
+        function openModal() { modal.style.display = "flex"; modalImg.src = img.src; }
+        function closeModal() { modal.style.display = "none"; }
+        window.onclick = function(event) { if (event.target == modal) { modal.style.display = "none"; } }
+        document.addEventListener('keydown', function(event){ if(event.key === "Escape"){ modal.style.display = "none"; } });
+    </script>
+
+</body>
+</html>
